@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Center {
+  id        String    @id @default(cuid())
+  name      String
+  phone     String
+  address   String?
+  plan      Plan      @default(STARTER)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  users     User[]
+  groups    Group[]
+  payments  Payment[]
+  aiUsage   AiUsage[]
+}
+
+enum Plan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+model User {
+  id            String         @id @default(cuid())
+  centerId      String
+  name          String
+  phone         String         @unique
+  password      String
+  role          Role
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  parentPhone   String?
+
+  center        Center         @relation(fields: [centerId], references: [id])
+  teacherGroups GroupTeacher[]
+  homeworks     Homework[]
+  studentGroups GroupStudent[]
+  submissions   Submission[]
+  attendances   Attendance[]
+  payments      Payment[]
+}
+
+enum Role {
+  MANAGER
+  TEACHER
+  STUDENT
+}
+
+model Group {
+  id          String          @id @default(cuid())
+  centerId    String
+  name        String
+  subject     Subject
+  startTime   String
+  endTime     String
+  days        String[]
+  monthlyFee  Float
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+
+  center      Center          @relation(fields: [centerId], references: [id])
+  teachers    GroupTeacher[]
+  students    GroupStudent[]
+  homeworks   Homework[]
+  attendances Attendance[]
+  payments    Payment[]
+}
+
+enum Subject {
+  MATH
+  PHYSICS
+  CHEMISTRY
+  ENGLISH
+  RUSSIAN
+  OTHER
+}
+
+model GroupTeacher {
+  groupId    String
+  teacherId  String
+  assignedAt DateTime @default(now())
+
+  group   Group @relation(fields: [groupId], references: [id])
+  teacher User  @relation(fields: [teacherId], references: [id])
+
+  @@id([groupId, teacherId])
+}
+
+model GroupStudent {
+  groupId   String
+  studentId String
+  joinedAt  DateTime @default(now())
+
+  group   Group @relation(fields: [groupId], references: [id])
+  student User  @relation(fields: [studentId], references: [id])
+
+  @@id([groupId, studentId])
+}
+
+model Homework {
+  id          String       @id @default(cuid())
+  groupId     String
+  teacherId   String
+  title       String
+  description String
+  subject     Subject
+  dueDate     DateTime
+  fileUrl     String?
+  createdAt   DateTime     @default(now())
+
+  group       Group        @relation(fields: [groupId], references: [id])
+  teacher     User         @relation(fields: [teacherId], references: [id])
+  submissions Submission[]
+}
+
+model Submission {
+  id          String     @id @default(cuid())
+  homeworkId  String
+  studentId   String
+  fileUrl     String
+  fileType    String
+  language    Language   @default(UZ)
+  status      SubStatus  @default(PENDING)
+  aiScore     Int?
+  aiGrade     String?
+  aiFeedback  Json?
+  aiCheckedAt DateTime?
+  submittedAt DateTime   @default(now())
+
+  homework    Homework   @relation(fields: [homeworkId], references: [id])
+  student     User       @relation(fields: [studentId], references: [id])
+}
+
+enum Language {
+  UZ
+  RU
+  EN
+}
+
+enum SubStatus {
+  PENDING
+  CHECKING
+  DONE
+  FAILED
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  groupId   String
+  studentId String
+  date      DateTime @db.Date
+  status    AttStatus
+  markedAt  DateTime @default(now())
+  markedBy  String
+
+  group     Group    @relation(fields: [groupId], references: [id])
+  student   User     @relation(fields: [studentId], references: [id])
+
+  @@unique([groupId, studentId, date])
+}
+
+enum AttStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+model Payment {
+  id        String    @id @default(cuid())
+  centerId  String
+  studentId String
+  groupId   String
+  amount    Float
+  month     String
+  status    PayStatus @default(PENDING)
+  paidAt    DateTime?
+  smsSentAt DateTime?
+  createdAt DateTime  @default(now())
+
+  center    Center    @relation(fields: [centerId], references: [id])
+  student   User      @relation(fields: [studentId], references: [id])
+  group     Group     @relation(fields: [groupId], references: [id])
+}
+
+enum PayStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+model AiUsage {
+  id        String   @id @default(cuid())
+  centerId  String
+  month     String
+  used      Int      @default(0)
+  limit     Int
+  updatedAt DateTime @updatedAt
+
+  center    Center   @relation(fields: [centerId], references: [id])
+
+  @@unique([centerId, month])
+}
