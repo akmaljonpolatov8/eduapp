@@ -1,0 +1,83 @@
+# ===========================
+# SECRETS — HECH QACHON COMMIT QILMA!
+# ===========================
+.env
+.env.local
+.env.production
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+config/secrets.dart
+
+# ===========================
+# Flutter / Dart
+# ===========================
+# Build
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/pubspec.lock
+**/.packages
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/*.g.dart
+**/*.freezed.dart
+**/*.mocks.dart
+mobile/lib/config/env.dart
+
+# ===========================
+# Node.js / Backend
+# ===========================
+**/node_modules/
+**/dist/
+**/coverage/
+**/.nyc_output/
+backend/uploads/
+backend/logs/
+*.log
+npm-debug.log*
+
+# ===========================
+# Web
+# ===========================
+web/node_modules/
+web/dist/
+web/.next/
+web/out/
+
+# ===========================
+# Database
+# ===========================
+*.sqlite
+*.db
+dump.sql
+
+# ===========================
+# OS / Editor
+# ===========================
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+.cursor/
+
+# ===========================
+# Docker
+# ===========================
+docker-compose.override.yml
+
+# ===========================
+# Uploads (user files)
+# ===========================
+uploads/
+storage/
